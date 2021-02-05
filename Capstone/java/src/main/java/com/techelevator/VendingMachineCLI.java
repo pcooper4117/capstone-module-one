@@ -1,4 +1,7 @@
 package com.techelevator;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**************************************************************************************************************************
 *  This is your Vending Machine Command Line Interface (CLI) class
 *
@@ -40,15 +43,18 @@ public class VendingMachineCLI {
 	*  should be coded
 	*
 	*  Methods should be defined following run() method and invoked from it
+	 * @throws IOException 
 	*
 	***************************************************************************************************************************/
 
-	public void run() {
+	public void run() throws IOException {
 
 		boolean shouldProcess = true;         // Loop control variable
 		
 		while(shouldProcess) {                // Loop until user indicates they want to exit
-			
+			VendingMachine ourVendingMachine = new VendingMachine();
+			ourVendingMachine.loadFile();
+			ourVendingMachine.dispense(ourVendingMachine.getItemsWithLocations().get("A2"));
 			String choice = (String)vendingMenu.getChoiceFromOptions(MAIN_MENU_OPTIONS);  // Display menu and get choice
 			
 			switch(choice) {                  // Process based on user menu choice
@@ -71,9 +77,15 @@ public class VendingMachineCLI {
 	}
 /********************************************************************************************************
  * Methods used to perform processing
+ * @throws IOException 
  ********************************************************************************************************/
-	public void displayItems() {      // static attribute used as method is not associated with specific object instance
+	public void displayItems() throws IOException {      // static attribute used as method is not associated with specific object instance
 		// Code to display items in Vending Machine
+		VendingMachine ourVendingMachine = new VendingMachine();
+			//ourVendingMachine.dispense(ourVendingMachine.getItemsWithLocations().get(""));
+			//ourVendingMachine.giveChange();
+			ourVendingMachine.audit();
+			
 	}
 	
 	public void purchaseItems() {	 // static attribute used as method is not associated with specific object instance
