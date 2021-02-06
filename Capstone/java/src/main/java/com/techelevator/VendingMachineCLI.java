@@ -1,6 +1,11 @@
 package com.techelevator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**************************************************************************************************************************
 *  This is your Vending Machine Command Line Interface (CLI) class
@@ -26,6 +31,7 @@ public class VendingMachineCLI {
 													    MAIN_MENU_OPTION_PURCHASE,
 													    MAIN_MENU_OPTION_EXIT
 													    };
+	VendingMachine ourVendingMachine = new VendingMachine();
 	
 	private Menu vendingMenu;              // Menu object to be used by an instance of this class
 	
@@ -52,9 +58,13 @@ public class VendingMachineCLI {
 		boolean shouldProcess = true;         // Loop control variable
 		
 		while(shouldProcess) {                // Loop until user indicates they want to exit
+			Scanner userInput = new Scanner(System.in);
+			
+			
+			
 			VendingMachine ourVendingMachine = new VendingMachine();
-			ourVendingMachine.loadFile();
-			ourVendingMachine.dispense(ourVendingMachine.getItemsWithLocations().get("A2"));
+			//ourVendingMachine.loadFile();
+			//ourVendingMachine.dispense(ourVendingMachine.getItemsWithLocations().get("A2"));
 			String choice = (String)vendingMenu.getChoiceFromOptions(MAIN_MENU_OPTIONS);  // Display menu and get choice
 			
 			switch(choice) {                  // Process based on user menu choice
@@ -82,15 +92,140 @@ public class VendingMachineCLI {
 	public void displayItems() throws IOException {      // static attribute used as method is not associated with specific object instance
 		// Code to display items in Vending Machine
 		VendingMachine ourVendingMachine = new VendingMachine();
+		ourVendingMachine.loadFile();
+		
+		
+		
+		//VendingMachine ourVendingMachine = new VendingMachine();
 			//ourVendingMachine.dispense(ourVendingMachine.getItemsWithLocations().get(""));
 			//ourVendingMachine.giveChange();
-			ourVendingMachine.audit();
+			//ourVendingMachine.audit();
 			
 	}
 	
-	public void purchaseItems() {	 // static attribute used as method is not associated with specific object instance
-		// Code to purchase items from Vending Machine
+	boolean shouldProcess = true;
+	public void feedMoney() throws IOException {
+		while (shouldProcess) {
+		System.out.println("Please enter money in the following dollar amounts: $1, $2, $5, $10 (press quit to return to menu) >>> ");
+		Scanner newScanner2 = new Scanner(System.in);
+		String userInput2 = newScanner2.nextLine();
+		// $1
+		if (userInput2.equals("1")) {
+			double newMoneyIn = ourVendingMachine.getMoneyIn() + 1;
+			ourVendingMachine.setMoneyIn(newMoneyIn);
+			ourVendingMachine.audit("1", userInput2);
+			purchaseItems();
+		}
+		// $2
+		else if (userInput2.equals("2")) {
+			double newMoneyIn = ourVendingMachine.getMoneyIn() + 2;
+			ourVendingMachine.setMoneyIn(newMoneyIn);
+			ourVendingMachine.audit("1", userInput2);
+			purchaseItems();
+		}
+		// $5
+		else if (userInput2.equals("5")) {
+			double newMoneyIn = ourVendingMachine.getMoneyIn() + 5;
+			ourVendingMachine.setMoneyIn(newMoneyIn);
+			ourVendingMachine.audit("1", userInput2);
+			purchaseItems();
+		}
+		// $10
+		else if (userInput2.equals("10")) {
+			double newMoneyIn = ourVendingMachine.getMoneyIn() + 10;
+			ourVendingMachine.setMoneyIn(newMoneyIn);
+			ourVendingMachine.audit("1", userInput2);
+			purchaseItems();
+		}
+		if (userInput2.equals("quit")) {
+			shouldProcess = false;
+			purchaseItems();
+			return;
+		}
+		//newScanner2.close();
+		return;
+		}
 	}
+	
+	public void selectProduct() throws IOException {
+		ourVendingMachine.loadFile();
+		
+		System.out.println("Please enter code of desired item: ");
+	
+		Scanner newScanner3 = new Scanner(System.in);
+		String userInput3 = newScanner3.nextLine();
+		Map<String, Item> itemsWithLocations = new TreeMap<String,Item>();
+		itemsWithLocations = ourVendingMachine.getItemsWithLocations();
+	
+		Set<String> theKeys = itemsWithLocations.keySet();
+	
+		// Check if item code is valid
+		if (!theKeys.contains(userInput3)) {
+			System.out.println("Invalid item code");
+			purchaseItems();
+		} 
+		// Check if item is sold out
+		if (itemsWithLocations.get(userInput3).getItemsLeft() == 0) {
+			System.out.println("Item is sold out");
+			purchaseItems();
+		} 
+		// If item is valid, dispense it
+		else {
+			Item selectedItem = itemsWithLocations.get(userInput3);
+			// add all the slot locations to userSelections
+			ourVendingMachine.setMoneyOwed(ourVendingMachine.getMoneyOwed() + selectedItem.getPrice());
+			ourVendingMachine.dispense(selectedItem);
+			purchaseItems();
+		}
+		return;
+	}
+	
+	public void purchaseItems() throws IOException {	 // static attribute used as method is not associated with specific object instance
+		// Code to purchase items from Vending Machine
+		
+		// How do you return to this menu instead of the main menu after you make a choice
+		System.out.println("Current Money Provided: " + ourVendingMachine.getMoneyIn() + "\n");
+		System.out.println("(1) Feed Money");
+		System.out.println("(2) Select Product");
+		System.out.println("(3) Finish Transaction");
+		
+		System.out.println("Please choose an option >>> ");
+		Scanner newScanner = new Scanner(System.in);
+		String userInput = newScanner.nextLine();
+		
+		ArrayList<String> userSelections = new ArrayList();
+		
+		// (1) Feed Money
+		
+		if (userInput.equals("1")) {
+			feedMoney();
+		}
+		
+		// (2) Select Product
+		if (userInput.equals("2")) {
+			selectProduct();
+		}
+		
+		// (3) Finish Transaction
+		if (userInput.equals("3")) {
+		//	ourVendingMachine.giveChange();
+		//	ourVendingMachine.setMoneyIn(0.00);
+		//	for (int i=0; i < userSelections.size(); i++) {
+		//		System.out.println(userSelections.get(i));
+		//	}
+	//	}
+			
+			// print out the names and slot locations of the items to Log.txt with audit()
+			// we want message1 to be the name and message 2 will be the slot location
+			// we want to use the slotLocations to get the item names from itemsWithLocations map
+			//for ()
+			//	ourVendingMachine.audit(
+		
+		
+		
+		}
+		}
+	//	}
 	
 	public void endMethodProcessing() { // static attribute used as method is not associated with specific object instance
 		// Any processing that needs to be done before method ends
