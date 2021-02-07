@@ -27,9 +27,11 @@ public class VendingMachineCLI {
 	private static final String MAIN_MENU_OPTION_DISPLAY_ITEMS = "Display Vending Machine Items";
 	private static final String MAIN_MENU_OPTION_PURCHASE      = "Purchase";
 	private static final String MAIN_MENU_OPTION_EXIT          = "Exit";
+	private static final String MAIN_MENU_OPTION_SALES_REPORT          = "Sales Report";
 	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_OPTION_DISPLAY_ITEMS,
 													    MAIN_MENU_OPTION_PURCHASE,
-													    MAIN_MENU_OPTION_EXIT
+													    MAIN_MENU_OPTION_EXIT,
+													    MAIN_MENU_OPTION_SALES_REPORT
 													    };
 	VendingMachine ourVendingMachine = new VendingMachine();
 	
@@ -81,6 +83,11 @@ public class VendingMachineCLI {
 					endMethodProcessing();    // Invoke method to perform end of method processing
 					shouldProcess = false;    // Set variable to end loop
 					break;                    // Exit switch statement
+					
+				case MAIN_MENU_OPTION_SALES_REPORT:
+					ourVendingMachine.salesReport();
+					break;
+					
 			}	
 		}
 		return;                               // End method and return to caller
@@ -109,11 +116,14 @@ public class VendingMachineCLI {
 		System.out.println("Please enter money in the following dollar amounts: $1, $2, $5, $10 (press quit to return to menu) >>> ");
 		Scanner newScanner2 = new Scanner(System.in);
 		String userInput2 = newScanner2.nextLine();
+		
 		// $1
 		if (userInput2.equals("1")) {
 			double newMoneyIn = ourVendingMachine.getMoneyIn() + 1;
 			ourVendingMachine.setMoneyIn(newMoneyIn);
 			ourVendingMachine.audit("1", userInput2);
+			Double newBalanceLeft = (ourVendingMachine.getBalanceLeft() + 1.0);
+			ourVendingMachine.setBalanceLeft(newBalanceLeft);
 			purchaseItems();
 		}
 		// $2
@@ -121,6 +131,8 @@ public class VendingMachineCLI {
 			double newMoneyIn = ourVendingMachine.getMoneyIn() + 2;
 			ourVendingMachine.setMoneyIn(newMoneyIn);
 			ourVendingMachine.audit("1", userInput2);
+			Double newBalanceLeft = (ourVendingMachine.getBalanceLeft() + 2.0);
+			ourVendingMachine.setBalanceLeft(newBalanceLeft);
 			purchaseItems();
 		}
 		// $5
@@ -128,6 +140,8 @@ public class VendingMachineCLI {
 			double newMoneyIn = ourVendingMachine.getMoneyIn() + 5;
 			ourVendingMachine.setMoneyIn(newMoneyIn);
 			ourVendingMachine.audit("1", userInput2);
+			Double newBalanceLeft = (ourVendingMachine.getBalanceLeft() + 5.0);
+			ourVendingMachine.setBalanceLeft(newBalanceLeft);
 			purchaseItems();
 		}
 		// $10
@@ -135,6 +149,8 @@ public class VendingMachineCLI {
 			double newMoneyIn = ourVendingMachine.getMoneyIn() + 10;
 			ourVendingMachine.setMoneyIn(newMoneyIn);
 			ourVendingMachine.audit("1", userInput2);
+			Double newBalanceLeft = (ourVendingMachine.getBalanceLeft() + 10.0);
+			ourVendingMachine.setBalanceLeft(newBalanceLeft);
 			purchaseItems();
 		}
 		if (userInput2.equals("quit")) {
@@ -147,6 +163,7 @@ public class VendingMachineCLI {
 		}
 	}
 	
+	
 	public void selectProduct() throws IOException {
 		ourVendingMachine.loadFile();
 		
@@ -156,10 +173,11 @@ public class VendingMachineCLI {
 		String userInput3 = newScanner3.nextLine();
 		Map<String, Item> itemsWithLocations = new TreeMap<String,Item>();
 		itemsWithLocations = ourVendingMachine.getItemsWithLocations();
-	
 		Set<String> theKeys = itemsWithLocations.keySet();
-	
+
+		
 		// Check if item code is valid
+		
 		if (!theKeys.contains(userInput3)) {
 			System.out.println("Invalid item code");
 			purchaseItems();
@@ -173,7 +191,11 @@ public class VendingMachineCLI {
 		else {
 			Item selectedItem = itemsWithLocations.get(userInput3);
 			// add all the slot locations to userSelections
+		
+			
+			ourVendingMachine.getUserSelections().add(userInput3);
 			ourVendingMachine.setMoneyOwed(ourVendingMachine.getMoneyOwed() + selectedItem.getPrice());
+			ourVendingMachine.setBalanceLeft(ourVendingMachine.getBalanceLeft() - selectedItem.getPrice());
 			ourVendingMachine.dispense(selectedItem);
 			purchaseItems();
 		}
@@ -184,6 +206,7 @@ public class VendingMachineCLI {
 		// Code to purchase items from Vending Machine
 		
 		// How do you return to this menu instead of the main menu after you make a choice
+		
 		System.out.println("Current Money Provided: " + ourVendingMachine.getMoneyIn() + "\n");
 		System.out.println("(1) Feed Money");
 		System.out.println("(2) Select Product");
@@ -193,7 +216,7 @@ public class VendingMachineCLI {
 		Scanner newScanner = new Scanner(System.in);
 		String userInput = newScanner.nextLine();
 		
-		ArrayList<String> userSelections = new ArrayList();
+		
 		
 		// (1) Feed Money
 		
@@ -207,25 +230,19 @@ public class VendingMachineCLI {
 		}
 		
 		// (3) Finish Transaction
+		
 		if (userInput.equals("3")) {
-		//	ourVendingMachine.giveChange();
-		//	ourVendingMachine.setMoneyIn(0.00);
-		//	for (int i=0; i < userSelections.size(); i++) {
-		//		System.out.println(userSelections.get(i));
-		//	}
-	//	}
+			ourVendingMachine.giveChange();
 			
-			// print out the names and slot locations of the items to Log.txt with audit()
-			// we want message1 to be the name and message 2 will be the slot location
-			// we want to use the slotLocations to get the item names from itemsWithLocations map
-			//for ()
-			//	ourVendingMachine.audit(
+			ourVendingMachine.audit(userInput, "");
+			}
+		
+			
+			
 		
 		
+	}
 		
-		}
-		}
-	//	}
 	
 	public void endMethodProcessing() { // static attribute used as method is not associated with specific object instance
 		// Any processing that needs to be done before method ends

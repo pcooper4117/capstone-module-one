@@ -20,9 +20,25 @@ public class VendingMachine {
 private Boolean VendingMachineSwitch;
 private Double moneyOwed;
 private Map <String, Item> itemsWithLocations = new TreeMap<String,Item>();
-
+private Double balanceLeft = 0.0;
 private Double moneyIn;
 private Double changeGiven;
+private ArrayList<String> userSelections = new ArrayList<String>();
+	public ArrayList<String> getUserSelections() {
+	return userSelections;
+}
+
+public void setUserSelections(ArrayList<String> userSelections) {
+	this.userSelections = userSelections;
+}
+
+	public Double getBalanceLeft() {
+	return balanceLeft;
+}
+
+public void setBalanceLeft(Double balanceLeft) {
+	this.balanceLeft = balanceLeft;
+}
 
 	public Boolean getVendingMachineSwitch() {
 	return VendingMachineSwitch;
@@ -110,8 +126,11 @@ public void setChangeGiven(Double changeGiven) {
 	else if (i.getType().equals("Gum")) {
 		message = "Chew Chew Yum!";
 	}
-	System.out.println(i.getName() + " " + i.getPrice() + " " + (moneyIn - i.getPrice()) + " " + message);
-	return i.getName() + " " + i.getPrice() + " " + (moneyIn - i.getPrice()) + " " + message;
+	
+	DecimalFormat format = new DecimalFormat("0.##");
+	
+	System.out.println(i.getName() + " " + i.getPrice() + " " + format.format(balanceLeft) + " " + message);
+	return i.getName() + " " + i.getPrice() + " " + format.format(balanceLeft) + " " + message;
 	}
 	
 	public double giveChange() {
@@ -152,20 +171,52 @@ public void setChangeGiven(Double changeGiven) {
 			Timestamp timeStampNow = Timestamp.valueOf(LocalDateTime.now());
 			String s = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(timeStampNow);
 			String message1 = " ";
-			Double message2 = 0.0;
+			String message2 = " ";
+			Double message3 = 0.0;
+			String message4 = "";
+			DecimalFormat format = new DecimalFormat("0.##");
 			if (userInput.equals("1")) {
 				message1 = "FEED MONEY: ";
-				message2 = Double.parseDouble(userInput2);
+				message2 = userInput2 + ".00";
+				message3 = moneyIn;
+				
 			}
 			if (userInput.equals("3")) {
-				//message1 = 
+				
+				for (int i = 0; i < userSelections.size(); i++) {
+				message1 = itemsWithLocations.get(userSelections.get(i)).getName()+ " " + (userSelections.get(i)).toString();
+				
+				}
+				message2 =  format.format(moneyIn);
+				message3 = balanceLeft;
+				message4 =(s + " Give Change" +" $" +  moneyIn +  " $0.00");
 			}
-			diskFileWriter.println(s + " " + message1 + " " + message2 + " " + moneyIn);
-			
+			diskFileWriter.println(s + " " + message1 + " " + "$" + message2 + " " + "$" + message3);
+			diskFileWriter.println(message4);
 			diskFileWriter.close();
-	 }
-	private void recieveMoney() {
-		// TODO Auto-generated method stub
+			}
+	 
+	 public void  salesReport () throws IOException {
+		 Timestamp timeStampNow = Timestamp.valueOf(LocalDateTime.now());
+			String s = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(timeStampNow);
+			//System.out.println("./salesReport" + s + ".txt");
+		 File g = new File("./salesReport" + s + ".txt");
+		 g.createNewFile();
+		 	Scanner theFile = new Scanner(g);
+			FileWriter aFileWriter = new FileWriter(g, true);
+			BufferedWriter aBufferedWriter = new BufferedWriter(aFileWriter);
+			PrintWriter diskFileWriter = new PrintWriter(aBufferedWriter);
+			String dirtySlots = "";
+			Item newI;
+			for (int i = 0; i < userSelections.size(); i++) {
+			 dirtySlots = userSelections.get(i);
+			 newI =  itemsWithLocations.get(dirtySlots);
+			}
+			//diskFileWriter.println(newI.getSlotLocation() + "|" + newI.getName() + "|" + newI.getPrice() + "|" + newI.getType());
+			
+			//diskFileWriter.close();
+			 
+			
 		
 	}	
 	}
