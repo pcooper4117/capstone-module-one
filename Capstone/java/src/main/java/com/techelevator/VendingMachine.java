@@ -20,10 +20,116 @@ public class VendingMachine {
 private Boolean VendingMachineSwitch;
 private Double moneyOwed;
 private Map <String, Item> itemsWithLocations = new TreeMap<String,Item>();
+private Map <String, Integer> itemsWithQuantitiesSold = new TreeMap<String, Integer>();
+private Map <String, String> itemsWithMessages = new TreeMap<String, String>();
+private Double totalSales = 0.00;
+/**
+ * @return the totalSales
+ */
+public Double getTotalSales() {
+	return totalSales;
+}
+
+/**
+ * @param totalSales the totalSales to set
+ */
+public void setTotalSales(Double totalSales) {
+	this.totalSales = totalSales;
+}
+
+/**
+ * @return the itemsWithMessages
+ */
+public Map<String, String> getItemsWithMessages() {
+	return itemsWithMessages;
+}
+
+/**
+ * @param itemsWithMessages the itemsWithMessages to set
+ */
+public void setItemsWithMessages(Map<String, String> itemsWithMessages) {
+	this.itemsWithMessages = itemsWithMessages;
+}
+
+/**
+ * @return the itemsWithQuantitiesSold
+ */
+public Map<String, Integer> getItemsWithQuantitiesSold() {
+	return itemsWithQuantitiesSold;
+}
+
+/**
+ * @param itemsWithQuantitiesSold the itemsWithQuantitiesSold to set
+ */
+public void setItemsWithQuantitiesSold(Map<String, Integer> itemsWithQuantitiesSold) {
+	this.itemsWithQuantitiesSold = itemsWithQuantitiesSold;
+}
+
+
 private Double balanceLeft = 0.0;
 private Double moneyIn;
 private Double changeGiven;
+private ArrayList<String> messages = new ArrayList();
+private ArrayList<Double> balances = new ArrayList();
 private ArrayList<String> userSelections = new ArrayList<String>();
+private ArrayList<Item> ourItems = new ArrayList();
+private ArrayList<String> salesReportMessages = new ArrayList();
+/**
+ * @return the salesReportMessages
+ */
+public ArrayList<String> getSalesReportMessages() {
+	return salesReportMessages;
+}
+
+/**
+ * @param salesReportMessages the salesReportMessages to set
+ */
+public void setSalesReportMessages(ArrayList<String> salesReportMessages) {
+	this.salesReportMessages = salesReportMessages;
+}
+
+/**
+ * @return the ourItems
+ */
+public ArrayList<Item> getOurItems() {
+	return ourItems;
+}
+
+/**
+ * @param ourItems the ourItems to set
+ */
+public void setOurItems(ArrayList<Item> ourItems) {
+	this.ourItems = ourItems;
+}
+
+/**
+ * @return the balances
+ */
+public ArrayList<Double> getBalances() {
+	return balances;
+}
+
+/**
+ * @param balances the balances to set
+ */
+public void setBalances(ArrayList<Double> balances) {
+	this.balances = balances;
+}
+
+/**
+ * @return the messages
+ */
+public ArrayList<String> getMessages() {
+	return messages;
+}
+
+/**
+ * @param messages the messages to set
+ */
+public void setMessages(ArrayList<String> messages) {
+	this.messages = messages;
+}
+
 	public ArrayList<String> getUserSelections() {
 	return userSelections;
 }
@@ -129,12 +235,12 @@ public void setChangeGiven(Double changeGiven) {
 	
 	DecimalFormat format = new DecimalFormat("0.##");
 	
-	System.out.println(i.getName() + " " + i.getPrice() + " " + format.format(balanceLeft) + " " + message);
+	System.out.printf(i.getName() + " " + i.getPrice() + " " + format.format(balanceLeft) + " " + message);
 	return i.getName() + " " + i.getPrice() + " " + format.format(balanceLeft) + " " + message;
 	}
 	
 	public double giveChange() {
-		double changeOwed = moneyIn - moneyOwed;
+		double changeOwed = balanceLeft;
 		final double FIVE_CENT = 0.05;
 		final double TEN_CENT = 0.10;
 		final double TWENTYFIVE_CENT = 0.25;
@@ -146,24 +252,30 @@ public void setChangeGiven(Double changeGiven) {
 		int quartersGiven = (int) (changeOwed / TWENTYFIVE_CENT);
 		int dimesGiven = 0;
 		int nickelsGiven = 0;
+		
 		while (changeLeft > 0.0) {
-			quartersGiven = (int) (changeOwed / TWENTYFIVE_CENT);
+			quartersGiven = (int) ((changeOwed) / TWENTYFIVE_CENT);
 			for (int i=0; i < quartersGiven; i++) {
 				changeLeft -= .25;
 			}
 			double changeOwedAfterQuarters = changeOwed % TWENTYFIVE_CENT;
-			dimesGiven = (int) (changeOwedAfterQuarters / TEN_CENT);
+			System.out.println(changeOwedAfterQuarters);
+			dimesGiven = (int) ((changeOwedAfterQuarters) / TEN_CENT);
+			for (int i=0; i < dimesGiven; i++) {
+				changeLeft -= .10;
+			}
 			double changeOwedAfterDimes = changeOwedAfterQuarters % TEN_CENT;
-			nickelsGiven = (int) (changeOwedAfterDimes / FIVE_CENT);
+			System.out.println(changeOwedAfterDimes);
+			nickelsGiven = (int) ((changeOwedAfterDimes) / FIVE_CENT);
 		}
 		System.out.println(changeOwed + "\nQuarters: " + quartersGiven + "\nDimes: " + dimesGiven + "\nNickels: " + nickelsGiven);
 		return changeOwed;
 		}
 		
 	 public void audit(String userInput, String userInput2) throws IOException {
+		 	DecimalFormat formatter = new DecimalFormat("0.00");
 			File f = new File("./log.txt");
 			f.createNewFile();
-			
 			Scanner theFile = new Scanner(f);
 			FileWriter aFileWriter = new FileWriter(f, true);
 			BufferedWriter aBufferedWriter = new BufferedWriter(aFileWriter);
@@ -179,44 +291,48 @@ public void setChangeGiven(Double changeGiven) {
 				message1 = "FEED MONEY: ";
 				message2 = userInput2 + ".00";
 				message3 = moneyIn;
-				
+				diskFileWriter.println(s + " " + message1 + " " + "$" + formatter.format(Double.parseDouble(message2)) + " " + "$" + formatter.format(message3));
+				diskFileWriter.close();
 			}
 			if (userInput.equals("3")) {
 				
-				for (int i = 0; i < userSelections.size(); i++) {
-				message1 = itemsWithLocations.get(userSelections.get(i)).getName()+ " " + (userSelections.get(i)).toString();
-				
-				}
+				// ArrayList of messages
+				// go through the for loop and add the message for each userSelection
+				// 
 				message2 =  format.format(moneyIn);
-				message3 = balanceLeft;
-				message4 =(s + " Give Change" +" $" +  moneyIn +  " $0.00");
+				// 
+				for (int i = 0; i < messages.size(); i++) {
+					message1 = messages.get(i);
+					message3 = balances.get(i);
+					diskFileWriter.println(s + " " + message1 + " " + "$" + formatter.format(Double.parseDouble(message2)) + " " + "$" + formatter.format(message3));
+					message2 = balances.get(i).toString();
+					message4 = (s + " GIVE CHANGE: " + " $" + formatter.format(balances.get(i)) + " $0.00");
+				}
+				diskFileWriter.println(message4);
+				balanceLeft = 0.00;
+				setBalances(new ArrayList<Double>());
+				setMessages(new ArrayList<String>());
+				
+				diskFileWriter.close();
 			}
-			diskFileWriter.println(s + " " + message1 + " " + "$" + message2 + " " + "$" + message3);
-			diskFileWriter.println(message4);
-			diskFileWriter.close();
 			}
+			
 	 
-	 public void  salesReport () throws IOException {
-		 Timestamp timeStampNow = Timestamp.valueOf(LocalDateTime.now());
-			String s = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(timeStampNow);
-			//System.out.println("./salesReport" + s + ".txt");
-		 File g = new File("./salesReport" + s + ".txt");
-		 g.createNewFile();
-		 	Scanner theFile = new Scanner(g);
-			FileWriter aFileWriter = new FileWriter(g, true);
-			BufferedWriter aBufferedWriter = new BufferedWriter(aFileWriter);
-			PrintWriter diskFileWriter = new PrintWriter(aBufferedWriter);
-			String dirtySlots = "";
-			Item newI;
-			for (int i = 0; i < userSelections.size(); i++) {
-			 dirtySlots = userSelections.get(i);
-			 newI =  itemsWithLocations.get(dirtySlots);
-			}
-			//diskFileWriter.println(newI.getSlotLocation() + "|" + newI.getName() + "|" + newI.getPrice() + "|" + newI.getType());
-			
-			//diskFileWriter.close();
-			 
-			
-		
-	}	
-	}
+	 public void  salesReport() throws IOException {
+		Timestamp timeStampNow = Timestamp.valueOf(LocalDateTime.now());
+		String s = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss").format(timeStampNow);
+		File g = new File("./salesReport" + s + ".txt");
+		g.createNewFile();
+		FileWriter aFileWriter = new FileWriter(g, true);
+		BufferedWriter aBufferedWriter = new BufferedWriter(aFileWriter);
+		PrintWriter diskFileWriter = new PrintWriter(aBufferedWriter);
+		Set<String> theKeys = itemsWithMessages.keySet();
+		for (String key : theKeys) {
+			// it doesn't print out the same name within the message
+			diskFileWriter.println(itemsWithMessages.get(key));
+		}
+		diskFileWriter.printf("\nTotal Sales: $%.2f", getTotalSales());
+		diskFileWriter.close();	
+		return;
+	 }
+}

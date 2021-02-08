@@ -1,6 +1,9 @@
 package com.techelevator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
@@ -63,8 +66,6 @@ public class VendingMachineCLI {
 			Scanner userInput = new Scanner(System.in);
 			
 			
-			
-			VendingMachine ourVendingMachine = new VendingMachine();
 			//ourVendingMachine.loadFile();
 			//ourVendingMachine.dispense(ourVendingMachine.getItemsWithLocations().get("A2"));
 			String choice = (String)vendingMenu.getChoiceFromOptions(MAIN_MENU_OPTIONS);  // Display menu and get choice
@@ -174,6 +175,7 @@ public class VendingMachineCLI {
 		Map<String, Item> itemsWithLocations = new TreeMap<String,Item>();
 		itemsWithLocations = ourVendingMachine.getItemsWithLocations();
 		Set<String> theKeys = itemsWithLocations.keySet();
+		Item selectedItem = itemsWithLocations.get(userInput3);
 
 		
 		// Check if item code is valid
@@ -183,31 +185,58 @@ public class VendingMachineCLI {
 			purchaseItems();
 		} 
 		// Check if item is sold out
-		if (itemsWithLocations.get(userInput3).getItemsLeft() == 0) {
+		else if (itemsWithLocations.get(userInput3).getItemsLeft() == 0) {
 			System.out.println("Item is sold out");
 			purchaseItems();
 		} 
+		// Check if user has enough money
+		else if (ourVendingMachine.getBalanceLeft() < selectedItem.getPrice()) {
+			System.out.println("Please insert more money");
+			purchaseItems();
+		}
+		
 		// If item is valid, dispense it
 		else {
-			Item selectedItem = itemsWithLocations.get(userInput3);
+			// add quantity of item purchased to itemsWithQuantitiesSold map
 			// add all the slot locations to userSelections
-		
-			
 			ourVendingMachine.getUserSelections().add(userInput3);
 			ourVendingMachine.setMoneyOwed(ourVendingMachine.getMoneyOwed() + selectedItem.getPrice());
 			ourVendingMachine.setBalanceLeft(ourVendingMachine.getBalanceLeft() - selectedItem.getPrice());
+			ourVendingMachine.getBalances().add(ourVendingMachine.getBalanceLeft());
 			ourVendingMachine.dispense(selectedItem);
-			purchaseItems();
-		}
+			ourVendingMachine.getMessages().add(selectedItem.getName()  + " " + userInput3.toString());
+			// if the selected item has already been purchased
+			if (ourVendingMachine.getItemsWithQuantitiesSold().containsKey(selectedItem.getName())) {
+				int itemQuantity = ourVendingMachine.getItemsWithQuantitiesSold().get(selectedItem.getName());
+				// ourVendingMachine.getItemsWithQuantitiesSold().put(selectedItem.getName(), (itemQuantity + 1));
+				// adjust the value of a key in a map
+				ourVendingMachine.getItemsWithQuantitiesSold().replace(selectedItem.getName(), itemQuantity + 1);
+				itemQuantity += 1;
+			}	
+			else {
+				ourVendingMachine.getItemsWithQuantitiesSold().put(selectedItem.getName(), 1);
+			}
+			// if there's already a sales report message with that name, overwrite that message with the new quantity
+			int itemQuantity = ourVendingMachine.getItemsWithQuantitiesSold().get(selectedItem.getName());
+			// if item quantity is greater than 1
+			String message = selectedItem.getName() + "|" + ourVendingMachine.getItemsWithQuantitiesSold().get(selectedItem.getName());
+			if (itemQuantity <= 1) {
+				ourVendingMachine.getItemsWithMessages().put(selectedItem.getName(), message);
+			}
+			else {
+				ourVendingMachine.getItemsWithMessages().replace(selectedItem.getName(), message);
+			}
+			ourVendingMachine.getOurItems().add(selectedItem);
+			ourVendingMachine.setTotalSales(ourVendingMachine.getTotalSales() + selectedItem.getPrice());
+			}
+		purchaseItems();
 		return;
-	}
+		}
 	
 	public void purchaseItems() throws IOException {	 // static attribute used as method is not associated with specific object instance
 		// Code to purchase items from Vending Machine
 		
-		// How do you return to this menu instead of the main menu after you make a choice
-		
-		System.out.println("Current Money Provided: " + ourVendingMachine.getMoneyIn() + "\n");
+		System.out.println("\nCurrent Money Provided: " + ourVendingMachine.getMoneyIn() + "\n");
 		System.out.println("(1) Feed Money");
 		System.out.println("(2) Select Product");
 		System.out.println("(3) Finish Transaction");
@@ -233,18 +262,16 @@ public class VendingMachineCLI {
 		
 		if (userInput.equals("3")) {
 			ourVendingMachine.giveChange();
-			
 			ourVendingMachine.audit(userInput, "");
+			ourVendingMachine.setMoneyIn(0.00);
 			}
-		
-			
-			
-		
-		
+		return;
 	}
 		
 	
 	public void endMethodProcessing() { // static attribute used as method is not associated with specific object instance
 		// Any processing that needs to be done before method ends
 	}
+	
+	
 }
