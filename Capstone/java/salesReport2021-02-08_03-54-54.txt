@@ -1,0 +1,5 @@
+Cola|1
+Potato Crisps|1
+Triplemint|1
+
+Total Sales: $5.05

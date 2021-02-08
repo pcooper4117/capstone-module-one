@@ -241,34 +241,27 @@ public void setChangeGiven(Double changeGiven) {
 	
 	public double giveChange() {
 		double changeOwed = balanceLeft;
-		final double FIVE_CENT = 0.05;
-		final double TEN_CENT = 0.10;
-		final double TWENTYFIVE_CENT = 0.25;
+		final int FIVE_CENT = 5;
+		final int TEN_CENT = 10;
+		final int TWENTYFIVE_CENT = 25;
+		DecimalFormat formatter = new DecimalFormat("0.00");
 		
 		// changeOwed
 		// break it into quarters, dimes and nickels
 		// break it into increments of 0.25, 0.10 and 0.05
-		double changeLeft = changeOwed;
-		int quartersGiven = (int) (changeOwed / TWENTYFIVE_CENT);
+		int change = (int) (changeOwed * 100);
+		int quartersGiven = (change / TWENTYFIVE_CENT);
 		int dimesGiven = 0;
 		int nickelsGiven = 0;
 		
-		while (changeLeft > 0.0) {
-			quartersGiven = (int) ((changeOwed) / TWENTYFIVE_CENT);
-			for (int i=0; i < quartersGiven; i++) {
-				changeLeft -= .25;
-			}
-			double changeOwedAfterQuarters = changeOwed % TWENTYFIVE_CENT;
-			System.out.println(changeOwedAfterQuarters);
-			dimesGiven = (int) ((changeOwedAfterQuarters) / TEN_CENT);
-			for (int i=0; i < dimesGiven; i++) {
-				changeLeft -= .10;
-			}
-			double changeOwedAfterDimes = changeOwedAfterQuarters % TEN_CENT;
-			System.out.println(changeOwedAfterDimes);
-			nickelsGiven = (int) ((changeOwedAfterDimes) / FIVE_CENT);
-		}
-		System.out.println(changeOwed + "\nQuarters: " + quartersGiven + "\nDimes: " + dimesGiven + "\nNickels: " + nickelsGiven);
+	
+		quartersGiven = (change / TWENTYFIVE_CENT);
+		int changeOwedAfterQuarters = change % TWENTYFIVE_CENT;
+		dimesGiven = changeOwedAfterQuarters / TEN_CENT;
+		int changeOwedAfterDimes = changeOwedAfterQuarters % TEN_CENT;
+		nickelsGiven = changeOwedAfterDimes / FIVE_CENT;
+		
+		System.out.println("Change owed: " + formatter.format(changeOwed) + "\nQuarters: " + quartersGiven + "\nDimes: " + dimesGiven + "\nNickels: " + nickelsGiven);
 		return changeOwed;
 		}
 		
